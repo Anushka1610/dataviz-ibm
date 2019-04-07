@@ -76,3 +76,48 @@ autolabel(rects3)
 
 fig.tight_layout()
 plt.show()
+
+
+
+from google.colab import files
+uploaded = files.upload()
+
+import pandas as pd
+import folium
+
+df_san=pd.read_csv("Police_Department_Incidents_-_Previous_Year__2016_ (1).csv",engine='python',encoding='utf-8')
+
+df =df_san.rename(columns={'PdDistrict':'Neighborhood'})
+
+df= df.groupby(['Neighborhood']).count()
+
+df=df.drop(['IncidntNum','Category','Descript','DayOfWeek','Date','Time','Resolution','Address','X','Y','PdId'], axis=1)
+
+df=df.rename(columns={'Location':'Count'})
+df=df.reset_index()
+df.head(11)
+
+from google.colab import files
+uploaded = files.upload()
+
+latitude = 37.77
+longitude = -122.42
+
+# create map and display it
+sanfran_map = folium.Map(location=[latitude, longitude], zoom_start=12)
+
+# display the map of San Francisco
+sanfran_map
+
+sanfran_geo = r'san-francisco.geojson'
+
+san= folium.Choropleth(geo_data=sanfran_geo,data=df,
+                           columns=(['Neighborhood', 'Count']),
+                           key_on='feature.properties.DISTRICT',
+                           fill_color='YlOrRd',
+                           fill_opacity=0.7,
+                           line_opacity=0.2,
+                           legend_name='Crime rates in San Francisco'
+                           ).add_to(sanfran_map)
+sanfran_map
+
